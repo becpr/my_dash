@@ -1,3 +1,5 @@
+require 'github_api'
+
 current_valuation = 0
 current_karma = 0
 
@@ -13,5 +15,10 @@ SCHEDULER.every '2s' do
   send_event('valuation', { current: current_valuation, last: last_valuation })
   send_event('karma', { current: current_karma, last: last_karma })
   send_event('synergy',   { value: rand(50) })
-  send_event('recent_git_commit', { text: "one step closer to a git commit message" })
+end
+
+SCHEDULER.every '60s', :first_in => 0 do
+  github = Github.new
+  commit_message = github.repos.commits.all('becpr', 'my_dash').first.commit.message
+  send_event('recent_git_commit', { text: commit_message })
 end
